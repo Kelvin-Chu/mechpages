@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Review - MechPages</title>
+    <link href="{% static 'css/leaflet.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">5. Review</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="99" aria-valuemin="0"
+             aria-valuemax="100" style="width: 99%">
+            <span class="sr-only">99% Complete</span>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="hidden-xs col-sm-10 col-sm-offset-1">
+            {% if request.user.userprofile.avatar %}
+                <img src="{{ request.user.userprofile.avatar_thumbnail.url }}" class="avatar-lg pull-left" alt="avatar"
+                     id="id_avatar_img">
+            {% else %}
+                <img src="{% static 'img/profile_default.png' %}" class="avatar-lg pull-left"
+                     id="id_avatar_img" alt="avatar">
+            {% endif %}
+            <h2>{{ request.user.userprofile.name|truncatechars:30 }}</h2>
+                <span class="meta bottomspace30">{% for item in request.user.userprofile.skills.all %}
+                    <mark class="label label-info skills font500">{{ item }}
+                    </mark>
+                {% endfor %}</span>
+
+            <p class="lead" style="margin:0;">{{ request.user.userprofile.short_bio }}</p>
+        </div>
+        <div class="col-xs-12 hidden-sm hidden-md hidden-lg">
+            <div class="text-center">
+                {% if request.user.userprofile.avatar %}
+                    <img src="{{ request.user.userprofile.avatar_thumbnail.url }}" class="avatar-lg" alt="avatar"
+                         id="id_avatar_img">
+                {% else %}
+                    <img src="{% static 'img/profile_default.png' %}" class="avatar-lg" id="id_avatar_img" alt="avatar">
+                {% endif %}
+            </div>
+            <div class="row">
+                <h2 class="text-center">{{ request.user.userprofile.name }}</h2>
+                    <span class="meta bottomspace30 text-center">
+                        {% for item in request.user.userprofile.skills.all %}
+                            <mark class="label label-success skills font500">{{ item }}</mark>
+                        {% endfor %}
+                    </span>
+
+                <p class="lead">{{ request.user.userprofile.short_bio }}</p>
+            </div>
+        </div>
+    </div>
+    <br>
+    {% for item in request.user.jobhistory.all %}
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1">
+                <div class="box effect2">
+                    <h5 class="text-left font500">{{ item.position }} - {{ item.years }} year(s)</h5>
+                    <h6 class="text-left font400">@ {{ item.company }}</h6>
+                    {{ item.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <br>
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1" style="padding:0;">
+            {% if request.user.projectimages.count == 0 %}
+                <div class="col-md-12">
+                    <div id='map'></div>
+                </div>
+            {% else %}
+                <div class="col-md-8">
+                    {% comment %}jssor{% endcomment %}
+                    <div class="jssor_wrapper">
+                        <div id="slider1_container" style="display: none; position: relative; margin: 0 auto; width: 640px;
+                                height: 480px; overflow: hidden;">
+                            <div u="loading" style="position: absolute; top: 0px; left: 0px;">
+                                <div style="filter: alpha(opacity=70); opacity:0.7; position: absolute; display: block;
+                                    background-color: #000; top: 0px; left: 0px;width: 100%; height:100%;">
+                                </div>
+                                <div style="position: absolute; display: block; top: 0px; left: 0px;width: 100%;height:100%;">
+                                </div>
+                            </div>
+                            <div u="slides" style="cursor: move; position: absolute; left: 0px; top: 0px; width: 640px; height: 480px;
+                                overflow: hidden;">
+                                {% for image in request.user.projectimages.all %}
+                                    <div>
+                                        <img u="image" src="{{ image.image_thumbnail.url }}"/>
+                                        {% if image.description %}
+                                            <div class="jssor_caption">
+                                                <div class="t">{{ image.description }}</div>
+                                            </div>
+                                        {% endif %}
+                                        <img u="thumb" src="{{ image.image_icon.url }}"/>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <!-- thumbnail navigator container -->
+                            <div u="thumbnavigator" class="jssort03" style="left: 0; bottom: 0;">
+                                <div style=" background-color: #000; filter:alpha(opacity=30); opacity:.3; width: 100%; height:100%;"></div>
+                                <div u="slides" style="cursor: default;">
+                                    <div u="prototype" class="p">
+                                        <div class=w>
+                                            <div u="thumbnailtemplate" class="t"></div>
+                                        </div>
+                                        <div class=c></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id='map'></div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <a class="btn btn-default" href="{% url 'profile_wizard' %}?page=4"><i
+                    class='icon-double-angle-left'></i> Prev</a>
+            <a class="btn btn-default" href="#" data-toggle="modal" data-target="#submitModal">Submit</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extracontent %}
+{% endblock %}
+
+{% block extra_body %}
+    <div class="modal fade" id="submitModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" role="form" action="{% url 'profile_wizard' %}?page=5">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Terms of Use</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="col-xs-12 text-center text-danger">{{ form.non_field_errors }}</div>
+                        <div class="scroll-box">
+                            {% include "TermsOfUse.txt" %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <input type="submit" class="btn btn-default" value="Accept" name="page5next">
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script type="text/javascript">
+        {% if request.user.location %}
+            var latitude = {{ request.user.location.latitude }};
+            var longitude = {{ request.user.location.longitude }};
+            var radius = {{ request.user.location.radius }};
+            var map = L.map('map', {center: [latitude, longitude], zoom: 10, maxZoom: 18, minZoom: 3});
+            var marker = L.marker([latitude, longitude]).addTo(map);
+            var circle = L.circle([latitude, longitude], radius, {
+                color: '#0159E5',
+                fillColor: '#A8C5E4',
+                fillOpacity: 0.7,
+            }).addTo(map);
+        {% else %}
+            var map = L.map('map', {center: [30.27, -97.75], zoom: 10, maxZoom: 18, minZoom: 3});
+        {% endif %}
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>, GeoSearch &copy; <a href="http://google.com">Google</a>',
+            id: 'scishock.cifudpnhf1v4ctfm1won1v6qu',
+            accessToken: 'pk.eyJ1Ijoic2Npc2hvY2siLCJhIjoiY2lmdWRwb3AyMXZ1aHVpa3JxZG11bGYybyJ9.ImkswjtZSzGP1e0GAuRlow'
+        }).addTo(map);
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        {#css resize sometimes cause the map to be positioned incorrectly, resize after 250ms#}
+        setTimeout(function () {
+            map.invalidateSize()
+        }, 250);
+        {% if request.user.projectimages.count != 0 %}
+            jQuery(document).ready(function ($) {
+                var options = {
+                    $AutoPlay: false,
+                    $AutoPlaySteps: 1,
+                    $AutoPlayInterval: 10000,
+                    $PauseOnHover: 1,
+                    $ArrowKeyNavigation: true,
+                    $SlideEasing: $JssorEasing$.$EaseOutQuint,
+                    $SlideDuration: 800,
+                    $MinDragOffsetToSlide: 20,
+                    $SlideSpacing: 0,
+                    $DisplayPieces: 1,
+                    $ParkingPosition: 0,
+                    $UISearchMode: 1,
+                    $PlayOrientation: 1,
+                    $DragOrientation: 1,
+                    $ThumbnailNavigatorOptions: {
+                        $Class: $JssorThumbnailNavigator$,
+                        $ChanceToShow: 2,
+                        $ActionMode: 1,
+                        $AutoCenter: 3,
+                        $Lanes: 1,
+                        $SpacingX: 3,
+                        $SpacingY: 3,
+                        $DisplayPieces: 9,
+                        $ParkingPosition: 260,
+                        $Orientation: 1,
+                        $DisableDrag: false
+                    }
+                };
+                $("#slider1_container").css("display", "block");
+                var jssor_slider1 = new $JssorSlider$("slider1_container", options);
+
+                function ScaleSlider() {
+                    var parentWidth = jssor_slider1.$Elmt.parentNode.clientWidth;
+                    if (parentWidth) {
+                        jssor_slider1.$ScaleWidth(parentWidth);
+                    }
+                    else
+                        window.setTimeout(ScaleSlider, 25);
+                }
+
+                ScaleSlider();
+                $(window).bind("load", ScaleSlider);
+                $(window).bind("resize", ScaleSlider);
+                $(window).bind("orientationchange", ScaleSlider);
+            });
+        {% endif %}
+    </script>
+{% endblock %}

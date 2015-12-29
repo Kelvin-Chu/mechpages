@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    <title>Log Out - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Log Out</span></h1>
+{% endblock %}
+
+{% block content %}
+    <p class="text-center">Are you sure you want to log out?</p>
+
+    <div class="text-center smalltitle form">
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            </br>
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+            {% endif %}
+            <input type="submit" class="btn btn-default" value="Confirm">
+        </form>
+    </div>
+{% endblock %}

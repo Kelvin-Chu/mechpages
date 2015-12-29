@@ -1,0 +1,19 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account %}
+
+{% block extrahead %}
+    <title>Confirmed - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Confirmed E-mail Address</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% user_display confirmation.email_address.user as user_display %}
+    <p class="text-center">{% blocktrans with confirmation.email_address.email as email %}You have confirmed that
+        <a href="mailto:{{ email }}">{{ email }}</a> is your e-mail address
+        .{% endblocktrans %}</p>
+{% endblock %}

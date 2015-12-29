@@ -1,0 +1,76 @@
+{% extends "postman/base.html" %}
+{% load widget_tweaks %}
+{% load mechpages_tags %}
+{% load static from staticfiles %}
+
+{% block intro %}
+    <h1><span class="colortext">{% block pm_write_title %}{% endblock %}</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% if name %}
+    <div id="postman" class="text-center">
+        <div class="col-md-8 col-md-offset-2">
+            {% if mech_id %}
+                <h4><a href="{% url 'browse' %}?mech_id={{ mech_id }}">{{ name|truncatechars:50 }}</a></h4>
+            {% else %}
+                <h4>{{ name|truncatechars:50 }}</h4>
+            {% endif %}
+            {% if thumb %}
+                {% if mech_id %}
+                    <a href="{% url 'browse' %}?mech_id={{ mech_id }}"><img class="img-responsive center-block avatar-resp" src="{{ thumb }}"/></a>
+                {% else %}
+                    <img class="img-responsive center-block avatar-resp" src="{{ thumb }}"/>
+                {% endif %}
+            {% else %}
+                {% if mech_id %}
+                    <a href="{% url 'browse' %}?mech_id={{ mech_id }}"><img class="img-responsive center-block avatar-resp" src="{% static 'img/profile_default.png' %}"/></a>
+                {% else %}
+                    <img class="img-responsive center-block avatar-resp" src="{% static 'img/profile_default.png' %}"/>
+                {% endif %}
+            {% endif %}
+            <form action="{% if next_url %}?next={{ next_url|urlencode }}{% endif %}" method="post">
+                {% csrf_token %}
+                {% block pm_write_recipient %}
+                    {{ form.recipients|attr:"type:hidden" }}
+                {% endblock %}
+                <div class="row text-left">
+                    {{ form.email.label_tag }}
+                </div>
+                <span class="text-left text-danger">{{ form.email.errors }}</span>
+                {{ form.email|attr:"class:col-xs-12" }}
+                <div class="row text-left">
+                    {{ form.subject.label_tag }}
+                </div>
+                <span class="text-left text-danger">{{ form.subject.errors }}</span>
+                {{ form.subject|attr:"class:col-xs-12" }}
+                <div class="row text-left">
+                    {{ form.body.label_tag }}
+                </div>
+            <span class="text-left text-danger">{{ form.body.errors }}</span>
+                {{ form.body|attr:"class:col-xs-12" }}
+                <div class="row">
+                    {% if request|check_send_rate_tag %}
+                        <div class="text-left col-xs-6"> </div>
+                    {% else %}
+                    <div class="text-left col-xs-6">
+                        <div class="g-recaptcha" data-sitekey="6LcXDxETAAAAALuaxvBV9bnM94gQDplSJdYvIkrl"></div>
+                        <span class="text-danger">{{ form.captcha.errors }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="text-right col-xs-6">
+                        <a class="btn btn-default" href="{% if next_url %}{{ next_url }}{% else %}{% url 'browse' %}{% endif %}">Cancel</a>
+                        <button class="btn btn-default" type="submit" onclick="this.disabled=true;this.form.submit();">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+        <h4 class="text-center topspace50">User Not Found</h4>
+    {% endif %}
+{% endblock %}
+
+{% block extra_body %}
+
+{% endblock %}

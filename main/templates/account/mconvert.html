@@ -1,0 +1,37 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>Sign Up - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Change to a Mechanic's Account</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <div class="row topspace15">
+            <div class="col-md-6 col-md-offset-3">
+                <a href="#">
+                    <div class="circleicon">
+                        <i class="icon-wrench"></i>
+                    </div>
+                    <h3>Be the boss</h3>
+
+                    <p>Work when you want, earn what you deserve.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="text-center smalltitle" style="margin-top:15px;">
+        <form id="form" method="POST" action="{% url 'mechanic_convert' %}">
+            {% csrf_token %}
+            <div class="col-xs-12 text-center topspace10">Note: This change is permanent and you will lose some
+                privileges of a user account.<br><br>
+            </div>
+            <input type="submit" class="btn btn-default" value="Convert">
+        </form>
+    </div>
+{% endblock %}

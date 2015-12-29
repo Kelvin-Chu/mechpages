@@ -1,0 +1,91 @@
+{% extends "account/profile.html" %}
+{% load widget_tweaks %}
+
+{% block link %}
+    {% url 'profile_mechanic' %}
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Mechanic's Account Settings</span></h1>
+{% endblock %}
+
+{% block form %}
+    <div class="tabs">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#personal" data-toggle="tab"><i class="icon icon-star"></i>Personal</a></li>
+            <li><a href="#car" data-toggle="tab"><i class="icon icon-truck"></i>Car</a></li>
+            <li><a href="#add" data-toggle="tab"><i class="icon icon-file-text"></i>Additional Settings</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="personal">
+                <div class="form-group">
+                    <div class="col-xs-8 col-xs-offset-3 text-left text-danger">{{ form.name.errors }}</div>
+                    <label for="{{ form.name.id_for_label }}" class="col-xs-3 control-label">Full Name:</label>
+                    {{ form.name|attr:"class:col-xs-8" }}
+                </div>
+                <div class="form-group" style="min-height:54px">
+                    <label class="col-xs-3 control-label">Mobile:</label>
+                    {% if request.user.userprofile.mobile %}
+                        <div class="col-xs-8 topspace7">+{{ user.userprofile.mobile }}<a
+                                href="{% url 'ajax_verify_pin' %}"> Change</a></div>
+                        <div class="col-xs-8 col-xs-offset-3 text-left text-success">Verified</div>
+                    {% else %}
+                        <div class="col-xs-8 topspace7">None Specified<a
+                                href="{% url 'ajax_verify_pin' %}"> Change</a></div>
+                    {% endif %}
+                </div>
+                <div class="form-group" style="min-height:54px">
+                    <label class="col-xs-3 control-label">Email Address:</label>
+
+                    <div class="col-xs-8 topspace7">{{ user.email|truncatechars:45 }} <a
+                            href="{% url 'account_email' %}">Change</a>
+                    </div>
+                </div>
+                <div class="form-group" style="min-height:54px">
+                    <label class="col-xs-3 control-label">Password:</label>
+
+                    <div class="col-xs-8 topspace7">********** <a href="{% url 'account_change_password' %}">Change</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label"></label>
+
+                    <div class="col-xs-8">
+                        <input type="submit" class="btn btn-default" value="Save Changes">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="car">
+                <div class="form-group">
+                    <div class="col-xs-8 col-xs-offset-3 text-left text-danger">{{ form.car_make.errors }}</div>
+                    <label for="{{ form.car_make.id_for_label }}" class="col-xs-3 control-label">Car
+                        Make:</label>
+                    {{ form.car_make|attr:"class:col-xs-8" }}
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-8 col-xs-offset-3 text-left text-danger">{{ form.car_model.errors }}</div>
+                    <label for="{{ form.car_model.id_for_label }}" class="col-xs-3 control-label">Car
+                        Model:</label>
+                    {{ form.car_model|attr:"class:col-xs-8" }}
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-8 col-xs-offset-3 text-left text-danger">{{ form.car_year.errors }}</div>
+                    <label for="{{ form.car_year.id_for_label }}" class="col-xs-3 control-label">Car
+                        Year:</label>
+                    {{ form.car_year|attr:"class:col-xs-8" }}
+                </div>
+                <div class="form-group">
+                    <label class="col-xs-2 control-label"></label>
+
+                    <div class="col-xs-8">
+                        <input type="submit" class="btn btn-default" value="Save Changes">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="add">
+                <p>Under development. In the mean time, please use the <a href="{% url 'profile_wizard' %}">profile
+                    wizard</a>.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

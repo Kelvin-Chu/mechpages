@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<url><loc>http://www.mechpages.com/</loc><changefreq>never</changefreq><priority>1.00</priority></url>
+<url><loc>http://www.mechpages.com/</loc><changefreq>never</changefreq><priority>1.00</priority></url>
+<url><loc>https://www.mechpages.com</loc><changefreq>never</changefreq><priority>1.00</priority></url>
+<url><loc>https://www.mechpages.com/home/</loc><changefreq>never</changefreq><priority>1.00</priority></url>
+<url><loc>https://www.mechpages.com/browse/</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/accounts/login/?next=/posts/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/accounts/signup/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/accounts/login/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/mechanics/register/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/privacy-policy/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/terms-of-use/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/contact/</loc><changefreq>never</changefreq><priority>0.85</priority></url>
+<url><loc>https://www.mechpages.com/accounts/password/reset/</loc><changefreq>never</changefreq><priority>0.69</priority></url>
+</urlset>

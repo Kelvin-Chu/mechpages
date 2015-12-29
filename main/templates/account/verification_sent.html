@@ -1,0 +1,17 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+    <title>Verify Your E-mail Address - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Verify Your E-mail Address</span></h1>
+{% endblock %}
+
+{% block content %}
+{% url 'account_email' as email_url %}
+    <br>
+    <p class="text-center">We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process.</p>
+
+{% endblock %}

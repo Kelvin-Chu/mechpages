@@ -1,0 +1,17 @@
+{% extends "socialaccount/base.html" %}
+
+{% load i18n %}
+
+{% block extrahead %}
+    <title>Login Cancelled - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Login Cancelled</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% url 'account_login' as login_url %}
+    <p class="text-center">{% blocktrans %}You decided to cancel logging in to our site using one of your existing
+        accounts. If this was a mistake, please proceed to <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+{% endblock %}

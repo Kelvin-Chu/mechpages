@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>MechPages - Find local freelance / mobile auto repair mechanics</title>
+{% endblock %}
+
+{% block gray %}
+    grayarea
+{% endblock %}
+
+{% block showmenu %}{% endblock %}
+
+{% block hidemobilemenu %}{% endblock %}
+
+{% block carousel %}
+    <section class="pageheader-default" style="background-image:url({% static 'img/demo/7.jpg' %});">
+        <div class="bgarea-semitransparent">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h1 class="landingpage animated fadeInLeftBig notransition">Need Your Car Repaired?</h1>
+
+                        <h3 class="landingpage animated fadeInRightBig notransition">
+                            <mark class="landingpage">Skip the shops. Hire a mechanic directly.</mark>
+                        </h3>
+                    </div>
+                </div>
+                <div class="row" style="padding-bottom:160px;">
+                    <form method="GET" action="{% url 'browse' %}" id="loginform">
+                        <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4 input-group animated
+                            fadeInUpBig notransition">
+                            <input type="search" class="form-control" placeholder="Enter Location" name="query">
+                            <span class="input-group-btn"><button class="landingpage-button" type="submit">Search
+                            </button></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block intro %}
+    <!-- INTRO NOTE
+================================================== -->
+
+    <h1>What Is <span class="colortext">MechPages</span>?</h1>
+
+    {#    <p class="text-center topspace20">#}
+    {#        Get personal with your mechanic.</p>#}
+
+    <p class="text-center topspace20">
+        Free classified listing for finding local mechanics. The goal is to connect you directly with a local mechanic
+        that you can trust so you don't have to worry about overpaying for repairs.
+    </p>
+
+    <ul class="ca-menu">
+        <li class="col-md-3">
+            <a href="#">
+                <div class="grey-box-icon">
+                    <div class="icon-box-top grey-box-icon-pos">
+                        <i class="fontawesome-icon medium circle-white center icon-search"></i>
+                    </div>
+                    <div class="ca-content">
+                        <h2 class="ca-main">Browse</h2>
+
+                        <h3 class="ca-sub">Enter your location and Mechpages will show you the closest mechanics along
+                            with their work history, skill set, customer reviews, and more.</h3>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li class="col-md-3">
+            <a href="#">
+                <div class="grey-box-icon">
+                    <div class="icon-box-top grey-box-icon-pos">
+                        <i class="fontawesome-icon medium circle-white center icon-external-link"></i>
+                    </div>
+                    <div class="ca-content">
+                        <h2 class="ca-main">Request</h2>
+
+                        <h3 class="ca-sub">No mechanics found in your area? Post a service request with a description
+                            of your issue for a future Mechpages mechanic to see.</h3>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li class="col-md-3">
+            <a href="#">
+                <div class="grey-box-icon">
+                    <div class="icon-box-top grey-box-icon-pos">
+                        <i class="fontawesome-icon medium circle-white center icon-wrench"></i>
+                    </div>
+                    <div class="ca-content">
+                        <h2 class="ca-main">Reviews</h2>
+
+                        <h3 class="ca-sub">The reviews at Mechpages are restricted to users with a verified mobile
+                            number (excluding VOIP) to limit spam and paid reviews.</h3>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li class="col-md-3">
+            <a href="#">
+                <div class="grey-box-icon active">
+                    <div class="icon-box-top grey-box-icon-pos">
+                        <i class="fontawesome-icon medium circle-white center icon-pencil"></i>
+                    </div>
+                    <div class="ca-content">
+                        <h2 class="ca-main">Message</h2>
+
+                        <h3 class="ca-sub">Send a message to as many mechanic as you want until you find the right
+                            one. Your email will be masked to protect your privacy.</h3>
+                    </div>
+                </div>
+            </a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <!-- FEATURES
+================================================== -->
+    <section class="home-features">
+        <div class="container col-md-12">
+            <h1 class="small text-center topspace0">Sign Up As A <span class="colortext">Mechanics</span></h1>
+
+            <p class="text-center topspace20">Be your own boss and earn more with Mechpages. There are no fees to set
+                up an account with Mechpages and users will be able to find you as soon as you complete your profile.
+                Standard features will always be free.
+            </p>
+
+            <div class="col-md-10 col-md-offset-1 animated slidea notransition">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-user"> </i> Free: Classified Listing</h4>
+                        Once you have created a mechanic's account and completed your profile, you will appear
+                        in our classified listing.
+                        <br>
+                    </div>
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-book"> </i> Free: Browse requests</h4>
+                        Head towards your toolbox and you will be able to browse through all the service requests
+                        that has been made by folks in your area.
+                        <br>
+                    </div>
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-check-sign"> </i> In Development: Lawful History Badge</h4>
+                        Earn the trust of your clients by signing up for a background check. We will not perform a
+                        background check unless it is authorized by you.
+                        <br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-h-sign"> </i> In Development: Work History Badge</h4>
+                        Further gain the trust of your clients by signing up for a work history check. This check
+                        will ensure the clients that you have the experience you claim you do.
+                        <br>
+                    </div>
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-star"> </i> In Development: Featured Status</h4>
+                        Earn good reviews and be eligible for the Featured Status where you will be listed first for
+                        searches in your area.
+                        <br>
+                    </div>
+                    <div class="col-md-4">
+                        <h4><i class="icon icon-ticket"> </i> In Development: Electronic Receipt</h4>
+                        Appear professional by using electronic receipt. All you have to do is list the repair that
+                        was done and the cost. We will send a copy to your client via email and store it for your
+                        reference later.
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extracontent %}
+    <div class="col-md-12">
+        <h1 class="small text-center">Completely Biased Feedback</h1>
+
+        <div class="br-hr type_short">
+            <span class="br-hr-h">
+            <i class="icon-pencil"></i>
+            </span>
+        </div>
+        <div id="cbp-qtrotator" class="cbp-qtrotator">
+            <div class="cbp-qtcontent">
+                <img src="{% static 'img/portrait.jpg' %}" alt="">
+                <blockquote>
+                    <p class="bigquote">
+                        <i class="icon-quote-left colortext quoteicon"></i> Got nothing here. Mechpages is brand new
+                        and don't have any reviews yet. You really shouldn't trust feedback about the site that you're
+                        reading it from anyways.
+                    </p>
+                    <footer class="pull-right">Kelvin</footer>
+                </blockquote>
+            </div>
+{#                        <div class="cbp-qtcontent">#}
+{#                            <img src="http://wowthemes.net/demo/biscaya/img/demo/avatar.jpg" alt="">#}
+{#                            <blockquote>#}
+{#                                <p class="bigquote">#}
+{#                                    <i class="icon-quote-left colortext quoteicon"></i> Lorem ipsum dolor sit adipiscing elit.#}
+{#                                    Praesent tempus eleifend risus ut congue eset nec lacus. Lorem ipsum dolor sit adipiscing#}
+{#                                    elit. Praesent tempus eleifend risus ut congue eset nec lacus. Praesent dignissim sem#}
+{#                                    sapien, a vulputate enim auctor vitae. Duis non lorem porta, adipiscing eros sit amet,#}
+{#                                    tempor sem.#}
+{#                                </p>#}
+{#                                <footer>Pino Caruso</footer>#}
+{#                            </blockquote>#}
+{#                        </div>#}
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="text-center">
+            <p class="bigtext">
+                Start Now!
+            </p>
+        </div>
+        <div class="text-center topspace20">
+            <a href="{% url 'browse' %}" class="buttonblack"><i class="icon-link"></i>&nbsp; Browse</a>
+            <a href="{% url 'post_a_job' %}" class="buttoncolor"><i class="icon-link"></i>&nbsp; Request</a>
+        </div>
+    </div>
+{% endblock %}
+{% block footer %}
+    <section>
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h1 class="footerbrand">Why MechPages?</h1>
+
+                        <p>I absolutely loath going to an auto shop to get things done on my car, regardless of whether
+                            it is something big or small. It makes me cringe. On the other hand, honest mechanics are
+                            getting swindled by shop owners with poor wages and long hours. My goal is to provide an
+                            alternative to this crooked industry by connecting folks with a mechanic directly. I want my
+                            money to go 100% to the person working on my car, not to a needless middle man.</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h1 class="title"><span class="colortext">C</span>ontact</h1>
+
+                        <div class="done">
+                            <div class="alert alert-success">
+                                <button type="button" class="close" data-dismiss="alert">x</button>
+                                Your message has been sent. Thank you!
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'contact' %}" id="contactform">
+                            {% csrf_token %}
+                            <div class="form">
+                                <div class="row">
+                                    <input class="col-xs-6" type="text" id="id_name" name="name" placeholder="Name">
+                                    <input class="col-xs-6" type="text" id="id_email" name="email" placeholder="E-mail">
+                                </div>
+                                <div class="row">
+                                    <textarea class="col-xs-12" id="id_message" name="message" rows="4"
+                                              placeholder="Message"></textarea>
+                                </div>
+                                <div class="row">
+                                    <input type="submit" id="submit" class="btn" value="Send">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_body %}
+    {#    <script>//----HEADER---//#}
+    {#    jQuery(window).scroll(function () {#}
+    {#        if (jQuery(document).scrollTop() == 0) {#}
+    {#            jQuery('.wowmenu').removeClass('tiny');#}
+    {#        } else {#}
+    {#            jQuery('.wowmenu').addClass('tiny');#}
+    {#        }#}
+    {#    });#}
+    {#    </script>#}
+{% endblock %}

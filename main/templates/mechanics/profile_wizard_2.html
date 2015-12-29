@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% load thumbnail %}
+
+{% block extrahead %}
+    <title>Projects - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">2. Skill and Work History</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="27" aria-valuemin="0"
+             aria-valuemax="100" style="width:27%">
+            <span class="sr-only">27% Complete</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+            <h3 class="landingpage">
+                <mark class="landingpage">Impress with your work and experience</mark>
+            </h3>
+        </div>
+    </div>
+    {% comment 'Loop through the user's jobhistory models and list all job history' %}{% endcomment %}
+    {% if request.user.jobhistory.count < 1 %}
+        <div class="row">
+            <div class=" col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+                <div class="box effect3">
+                    <h5 class="text-left font500">Example: Automotive Mechanic - 7 year(s)</h5>
+                    <h6 class="text-left font400">@ AutoCare Inc.</h6>
+                    * Specialize in servicing brakes and fuel systems.<br>
+                    * Perform routine and anticipatory maintenance and repair of vehicles and equipment.<br>
+                    * Diagnosing the causes of any malfunctions.<br>
+                    * Maintain, repair, overhaul, adjust, install and calibrate necessary vehicle fuel systems.<br>
+                    * Installed, disassembled, cleaned, repaired, replaced parts, reassembled and tested a variety of
+                    drive
+                    train equipment.<br>
+                    * Performed major and minor motor tune-up, inserted points, cleaned and replaced spark plugs.<br>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% comment 'Loop through the user's jobhistory models and list all job history' %}{% endcomment %}
+    {% for item in request.user.jobhistory.all %}
+        <div class="row">
+            <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+                <div class="box effect3">
+                    <a class="close open-DeleteJobDialog" href="#" data-id="{{ item.pk }}" data-toggle="modal"
+                       data-target="#deleteJobModal">x</a>
+                    <h5 class="text-left font500">{{ item.position }} - {{ item.years }} year(s)</h5>
+                    <h6 class="text-left font400">@ {{ item.company }}</h6>
+                    {{ item.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <button type="button" data-toggle="modal" data-target="#addJobModal" class="btn btn-primary pull-right">
+                <i class='icon-plus'></i> Add Work
+            </button>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <div class="info-box shadow-large bottom0">
+                <div class="info-box-inner">
+                    <h5 class="text-left font500">Skills:</h5>
+                    {% for item in request.user.userprofile.skills.all %}
+                        <form method="POST" role="form" action="{% url 'remove_skill' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <mark class="label label-info skills font500">{{ item }}
+                                <input type="hidden" id="id_skill_pk" name="item_pk" value="{{ item.pk }}">
+                                <button><i class='icon-minus'></i></button>
+                            </mark>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <button type="button" data-toggle="modal" data-target="#addSkillModal" class="btn btn-primary pull-right">
+                <i class='icon-plus'></i> Add Skill
+            </button>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <a class="btn btn-default" href="{% url 'profile_wizard' %}?page=1"><i
+                    class='icon-double-angle-left'></i> Prev</a>
+
+            <form method="POST" role="form" action="{% url 'profile_wizard' %}?page=2" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-default" type="submit" name="page2next">Next <i
+                        class='icon-double-angle-right'></i>
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_body %}
+    {% comment 'Modal for adding a job' %}{% endcomment %}
+    <div class="modal fade" id="addJobModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add A Work History</h4>
+                </div>
+                <form method="POST" role="form" action="{% url 'profile_wizard' %}?page=2">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 text-center text-danger">
+                            {{ form.non_field_errors }}</div>
+                        <div class="row">
+                            <div class="col-xs-12 text-left text-danger">{{ form.company.errors }}</div>
+                            <div class="col-xs-12 text-left text-danger">{{ form.years.errors }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-10">
+                                <h6 class="text-left font500">Company Name</h6>
+                                {{ form.company|attr:"class:col-xs-12 no-bottom-margin"|attr:"autofocus"|attr:"placeholder:" }}
+                            </div>
+                            <div class="col-xs-2">
+                                <h6 class="text-left font500">Year(s)</h6>
+                                {{ form.years|attr:"class:col-xs-12 no-bottom-margin"|attr:"placeholder:"|attr:"data-toggle:tooltip"|attr:"title:Number of years you worked here"|attr:"data-placement:bottom" }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h6 class="text-left font500">Position</h6>
+
+                                <div class="col-xs-12 text-left text-danger"
+                                     style="padding:0">{{ form.position.errors }}</div>
+                                {{ form.position|attr:"class:col-xs-12 no-bottom-margin"|attr:"placeholder:" }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h6 class="text-left font500">Description</h6>
+
+                                <div class="col-xs-12 text-left text-danger">{{ form.description.errors }}</div>
+                                {{ form.description|attr:"class:col-xs-12 no-bottom-margin"|attr:"placeholder:" }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" name="page2" class="btn btn-primary pull-right">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% comment 'Modal for adding a skill' %}{% endcomment %}
+    <div class="modal fade" id="addSkillModal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Select Your Skills</h4>
+                </div>
+                <form method="POST" role="form" action="{% url 'add_skills' %}">
+                    {% csrf_token %}
+                    <div class="modal-body" style="padding:0;">
+                        <div class="well">
+                            <ul class="list-group">
+                                {% for field in form2.skills %}
+                                    <li class="list-group-item">
+                                        <h6 class="font500" style="display:inline;">{{ field.choice_label }}</h6>
+
+                                        <div class="material-switch pull-right">
+                                            {{ field.tag }}
+                                            <label for="{{ field.id_for_label }}" class="label-primary"></label>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer" style="border-top:0;">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary pull-right">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% comment 'Modal for deleting an job' %}{% endcomment %}
+    <div class="modal fade" id="deleteJobModal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Are You Sure?</h4>
+                </div>
+                <form method="POST" role="form" action="{% url 'delete' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>Note: It will be permanently removed.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input type="hidden" id="id_job_pk" name="item_pk" value="">
+                        <input type="hidden" name="page" value="2">
+                        <input type="hidden" name="model" value="JobHistory">
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        {% comment 'Automatically open up the modal if there is a form error' %}{% endcomment %}
+        {% if form.non_field_errors or form.company.errors or form.years.errors or form.position.errors or form.description.errors%}
+            $(window).load(function () {
+                $('#addJobModal').modal('show');
+            });
+        {% endif %}
+        {% comment 'Pass in job primary key from the link to the input value in the modal' %}{% endcomment %}
+        $(document).on("click", ".open-DeleteJobDialog", function () {
+            var item_pk = $(this).data('id');
+            $('#id_job_pk').val(item_pk);
+        });
+        $(function () {
+            $('.list-group.checked-list-box .list-group-item').each(function () {
+                // Settings
+                var $widget = $(this),
+                        $checkbox = $('<input type="checkbox" class="hidden" />'),
+                        color = ($widget.data('color') ? $widget.data('color') : "primary"),
+                        style = ($widget.data('style') == "button" ? "btn-" : "list-group-item-"),
+                        settings = {
+                            on: {
+                                icon: 'glyphicon glyphicon-check'
+                            },
+                            off: {
+                                icon: 'glyphicon glyphicon-unchecked'
+                            }
+                        };
+                $widget.css('cursor', 'pointer');
+                $widget.append($checkbox);
+                // Event Handlers
+                $widget.on('click', function () {
+                    $checkbox.prop('checked', !$checkbox.is(':checked'));
+                    $checkbox.triggerHandler('change');
+                    updateDisplay();
+                });
+                $checkbox.on('change', function () {
+                    updateDisplay();
+                });
+                // Actions
+                function updateDisplay() {
+                    var isChecked = $checkbox.is(':checked');
+                    // Set the button's state
+                    $widget.data('state', (isChecked) ? "on" : "off");
+                    // Set the button's icon
+                    $widget.find('.state-icon')
+                            .removeClass()
+                            .addClass('state-icon ' + settings[$widget.data('state')].icon);
+                    // Update the button's color
+                    if (isChecked) {
+                        $widget.addClass(style + color + ' active');
+                    } else {
+                        $widget.removeClass(style + color + ' active');
+                    }
+                }
+
+                // Initialization
+                function init() {
+                    if ($widget.data('checked') == true) {
+                        $checkbox.prop('checked', !$checkbox.is(':checked'));
+                    }
+                    updateDisplay();
+                    // Inject the icon if applicable
+                    if ($widget.find('.state-icon').length == 0) {
+                        $widget.prepend('<span class="state-icon ' + settings[$widget.data('state')].icon + '"></span>');
+                    }
+                }
+
+                init();
+            });
+        });
+    </script>
+{% endblock %}

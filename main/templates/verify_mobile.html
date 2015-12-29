@@ -1,0 +1,173 @@
+{% extends "account/base.html" %}
+{% load widget_tweaks %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Verify Mobile Number - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    {% if user.userprofile.mobile_verified %}
+        <h1><span class="colortext">Change Mobile Number</span></h1>
+    {% else %}
+        <h1><span class="colortext">Verify Mobile Number</span></h1>
+    {% endif %}
+{% endblock %}
+
+{% block body_head %}
+    <script>
+        {% comment %}
+            Takes the value of #id_mobile and submits it to ajax_send_pin (check url.py) via ajax
+            If successful status code received, unlock the next field (verify pin), otherwise append the error
+            returned from the form and append it to #mobile_error
+        {% endcomment %}
+        function send_pin() {
+            $("#send_pin").button('loading');
+            $("#id_mobile").attr('readonly', 'true');
+            $.ajax({
+                url: "{% url 'ajax_send_pin' %}",
+                type: "POST",
+                data: {
+                    id_mobile: $("#id_mobile").val(),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $("#id_mobile").removeAttr('readonly', 'true');
+                    $("#id_pin").removeAttr('disabled', 'true');
+                    $("#verify_pin").removeAttr('disabled', 'true');
+                    $("#mobile_error").html("");
+                    $("#mobile_success").html("Sent!");
+                    $(".mobileInput").css({"border-color": "#4F8A10", "outline": "none"});
+                    $("#send_pin").button('complete');
+                    $("#id_pin").focus();
+                },
+                error: function (xhr, errmsg, err) {
+                    $("#id_mobile").removeAttr('readonly', 'true');
+                    $("#mobile_error").html(xhr.responseText);
+                    $("#mobile_success").html("");
+                    $(".mobileInput").css({"border-color": "#FF0000", "outline": "none"});
+                    $("#send_pin").button('complete');
+                    $("#id_mobile").focus();
+                }
+            });
+        }
+        {% comment %}
+            Takes the value of #id_mobile, #id_pin, and #id_is_mechanic and sends it to {% url 'ajax_verify_pin' %}
+            via ajax.  Same idea as the function above, most of the work is done in the view and this function
+            only sends data and handles response.
+        {% endcomment %}
+        function verify_pin() {
+            $("#verify_pin").button('loading');
+            $("#id_pin").attr('readonly', 'true');
+            $("#id_mobile").attr('readonly', 'true');
+            $.ajax({
+                url: "{% url 'ajax_verify_pin' %}",
+                type: "POST",
+                data: {
+                    id_mobile: $("#id_mobile").val(),
+                    id_pin: $("#id_pin").val(),
+                    id_is_mechanic: $("#id_is_mechanic").val(),
+                    next: $('input[name=next]').val(),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    window.location.href = data;
+                },
+                error: function (xhr, errmsg, err) {
+                    if (xhr.status == '403') {
+                        $("#id_pin").removeAttr('readonly', 'true');
+                        $("#id_mobile").removeAttr('readonly', 'true');
+                        $("#mobile_error").html(xhr.responseText);
+                        $("#mobile_success").html("");
+                        $("#pin_error").html("");
+                        $("#pin_success").html("");
+                        $(".mobileInput").css({"border-color": "#FF0000", "outline": "none"});
+                        $("#verify_pin").button('complete');
+                        $("#id_mobile").focus();
+                    }
+                    if (xhr.status == '404') {
+                        $("#id_pin").removeAttr('readonly', 'true');
+                        $("#id_mobile").removeAttr('readonly', 'true');
+                        $("#pin_error").html(xhr.responseText);
+                        $("#mobile_success").html("");
+                        $("#mobile_error").html("");
+                        $("#pin_success").html("");
+                        $(".mobileInput").css({"border-color": "#4F8A10", "outline": "none"});
+                        $(".pinInput").css({"border-color": "#FF0000", "outline": "none"});
+                        $("#verify_pin").button('complete');
+                        $("#id_pin").focus();
+                    }
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <br>
+    <div class="row">
+        <div class="col-xs-10 col-xs-offset-1 alert alert-info alert-dismissable text-center">
+            <a class="panel-close close" data-dismiss="alert">x</a>
+            <i class="icon-warning-sign"></i>
+            &nbspYour mobile number will not be sold, shared or made public. Standard sms rate from your carrier may apply.
+        </div>
+    </div>
+    <div class="text-center smalltitle form">
+        <div class="col-xs-11 col-xs-offset-1 col-lg-10 col-lg-offset-2 text-left text-danger"
+             id="mobile_error"></div>
+        <div class="col-xs-11 col-xs-offset-1 col-lg-10 col-lg-offset-2 text-left text-success"
+             id="mobile_success"></div>
+        <div class="col-xs-1 col-lg-offset-1 text-right topspace7">1&nbsp</div>
+        {{ form.mobile|attr:"class:col-xs-6 col-sm-7 col-lg-6 mobileInput"|attr:"placeholder:Mobile Number"|attr:"onkeydown:if (event.keyCode == 13) document.getElementById('send_pin').click()" }}
+        <button type="button" class="btn btn-default start col-xs-4 col-sm-3 col-lg-2" id="send_pin"
+                style="min-height:38px" onClick="send_pin()"
+                data-loading-text="<i class='icon-spinner icon-spin'></i> Sending"
+                data-complete-text="<i class='icon-repeat'></i> Re-send"><i class="icon-share"></i> Get PIN
+        </button>
+        <div class="col-xs-8 col-xs-offset-3 col-sm-offset-4 col-lg-5 col-lg-offset-5 text-left text-danger"
+             id="pin_error"></div>
+        <div class="col-xs-8 col-xs-offset-3 col-sm-offset-4 col-lg-5 col-lg-offset-5 text-left text-success"
+             id="pin_success"></div>
+        {{ form.pin|attr:"class:col-xs-4 col-xs-offset-3 col-sm-offset-4 col-lg-3 col-lg-offset-5 pinInput"|attr:"placeholder:PIN"|attr:"onkeydown:if (event.keyCode == 13) document.getElementById('verify_pin').click()"|attr:"disabled" }}
+        <button type="button" class="btn btn-default start col-xs-4 col-sm-3 col-lg-2" id="verify_pin"
+                style="min-height:38px" onClick="verify_pin()"
+                data-loading-text="<i class='icon-spinner icon-spin'></i> Verifying"
+                data-complete-text="<i class='icon-repeat'></i> Retry" disabled> Verify
+        </button>
+        {% comment %}
+            The mechanic variable is passed in from the url, parsed by the view, and then used here.  If the url is:
+            {% url 'ajax_verify_pin' mechanic='mechanic' %}, then a hidden input #id_is_mechanic will be set to true
+            so that it will mark the user as a mechanic
+        {% endcomment %}
+        {% if mechanic %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{% url 'profile_wizard' %}"/>
+            <input type="checkbox" id="id_is_mechanic" name="is_mechanic" checked="checked"
+                   style="opacity:0; position:absolute; left:9999px;">
+        {% elif redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+        {% endif %}
+        <br>
+
+        <div class="col-xs-12 text-center"><h6>Mobile verification will not accept the following numbers:</h6></div>
+        <div class="col-xs-8 col-xs-offset-2 col-lg-7 col-lg-offset-3 text-left">
+            <ul>
+                <li>Non-US mobile numbers</li>
+                <li>Toll-free numbers</li>
+                <li>VOIP numbers</li>
+                <li>Mobile numbers that require an extension</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_body %}
+    <script src="{% static 'js/inputmask.min.js' %}"></script>
+    <script>
+        {% comment 'Makes sure user enters good format for mobile field' %}{% endcomment %}
+        $(window).load(function() {
+            var phones = [{ "mask": "(###) ###-####"}, { "mask": "(###) ###-##############"}];
+            $('#id_mobile').inputmask({mask: phones, greedy: false, definitions: { '#': { validator: "[0-9]", cardinality: 1}} });
+        });
+    </script>
+{% endblock %}

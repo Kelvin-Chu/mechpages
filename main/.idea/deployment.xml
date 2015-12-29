@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="52.32.215.198" promptOnLocalOverwrite="false">
+    <serverData>
+      <paths name="52.32.215.198">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/etc/mechpages/main" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/etc/mechpages/media" local="$PROJECT_DIR$/../media" web="/media" />
+            <mapping deploy="/etc/mechpages/static" local="$PROJECT_DIR$/../static" web="/static" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>

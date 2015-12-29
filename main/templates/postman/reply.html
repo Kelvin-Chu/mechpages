@@ -1,0 +1,12 @@
+{% extends "postman/base_write.html" %}
+{% load static from staticfiles %}
+
+{% block pm_write_title %}Reply To{% endblock %}
+
+{% block extrahead %}
+    <title>Reply - MechPages</title>
+    <link href="{% static 'postman/css/postman.css' %}" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+{% endblock %}
+
+{% block pm_write_recipient %}{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>Sign Up - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Create a Mechanic's Account</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+            <h3 class="landingpage">
+                <mark class="landingpage">Work when you want, earn what you deserve</mark>
+            </h3>
+        </div>
+    </div>
+    <br>
+    <div class="text-center">
+        {% include "socialaccount/snippets/provider_list_mechanic.html" with process="login" %}
+        {% include "socialaccount/snippets/login_extra.html" %}
+    </div>
+
+    <div class="text-center smalltitle">
+        <h5>Or</h5>
+
+        <form class="signup" id="signup_form" method="POST" action="{% url 'mechanic_signup' %}">
+            {% csrf_token %}
+            <div class="col-xs-12 text-left text-danger">{{ form.non_field_errors }}</div>
+
+            <div class="col-xs-12 text-left text-danger">{{ form.email.errors }}</div>
+            {{ form.email|attr:"class:col-xs-12"|attr:"placeholder:E-mail Address"|attr:"autofocus" }}
+
+            <div class="col-xs-12 text-left text-danger">{{ form.password1.errors }}</div>
+            {{ form.password1|attr:"class:col-xs-12"|attr:"placeholder:Choose a Password" }}
+
+            <input type="hidden" name="{{ redirect_field_name }}"
+                   value="{% url 'ajax_verify_pin' mechanic='mechanic' %}"/>
+            <input type="submit" id="signup" class="btn btn-default" value="Sign Up">
+        </form>
+    </div>
+    <br><p class="text-center">Already have an account? Then please <a href="{% url 'account_login' %}">sign in</a>.</p>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "postman/base.html" %}
+{% load postman_tags %}
+{% load widget_tweaks %}
+{% load mechpages_tags %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Message - MechPages</title>
+    <link href="{% static 'postman/css/postman.css' %}" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">{% if pm_messages|length > 1 %}Conversation{% else %}Message{% endif %}</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div id="postman" class="text-center">
+        {% for message in pm_messages reversed %}
+            {% if forloop.first %}
+                <div class="row text-left">
+                    <form action="" method="post">{% csrf_token %}
+                        <input type="hidden" {% if pm_messages|length > 1 and message.thread_id %}name="tpks"
+                               value="{{ message.thread_id }}" {% else %}name="pks"
+                               value="{{ message.pk }}"{% endif %}/>
+                        <a class="btn btn-default" href="{{ next_url }}"><i class='icon-double-angle-left'></i> Back</a>
+                    <span id="pm_buttons"><button type="submit" class="btn btn-danger"
+                                                  onclick="this.form.action='{% url 'postman:delete' %}?next={{ next_url|urlencode }}'">
+                        Delete
+                    </button>
+                        {% if not archived %}
+                            <button type="submit" class="btn btn-default"
+                                    onclick="this.form.action='{% url 'postman:archive' %}?next={{ next_url|urlencode }}'">
+                                Archive
+                            </button>{% endif %}
+                    </span>
+                        {% if reply_to_pk %}
+                            <a class="btn btn-default"
+                               href="{% url 'postman:reply' reply_to_pk %}?next={{ next_url|urlencode }}">
+                                Reply</a>
+                        {% endif %}
+                    </form>
+                </div>
+            {% endif %}
+            {% if forloop.counter == 2 %}
+                <div class="text-left topspace15"><strong>Previous message(s):</strong></div>
+            {% endif %}
+            <div class="topspace15 pm_message{% if message.is_pending %} pm_pending{% endif %}{% if message.is_rejected %} pm_rejected{% endif %}{% if message.sender == user and message.sender_archived or message.recipient == user and message.recipient_archived %} pm_archived{% endif %}{% if message.sender == user and message.sender_deleted_at or message.recipient == user and message.recipient_deleted_at %} pm_deleted{% endif %}{% if message.recipient == user and not message.read_at %} pm_unread{% endif %}">
+                <div class="pm_header text-left panel" style="margin-bottom:0;">
+                    <span class="pm_date"><strong>{{ message.sent_at|date:"DATETIME_FORMAT" }}</strong></span><br>
+                    <span class="pm_sender"><strong>From: </strong>{% if message.sender == user %}&lt;me&gt;
+                    {% elif message.sender.userprofile.name %}
+                        {% if message.sender.userprofile.is_mechanic %}
+                            <a href="{% url 'browse' %}?mech_id={{ message.sender.userprofile.pk }}">{{ message.sender.userprofile.name|truncatechars:30 }}
+                                (Id: {{ message.sender.name }})</a>
+                        {% else %}
+                            {{ message.sender.userprofile.name|truncatechars:30 }} (Id: {{ message.sender.name }})
+                        {% endif %}
+                    {% elif message.sender.name %}Anonymous (Id: {{ message.sender.name }})
+                        {% else %}{{ message.obfuscated_sender }} (Visitor)
+                    {% endif %}
+                    </span><br>
+                    <span class="pm_recipient"><strong>To: </strong>{% if message.recipient == user %}&lt;me&gt;
+                    {% elif message.recipient.userprofile.name %}
+                        {% if message.recipient.userprofile.is_mechanic %}
+                            <a href="{% url 'browse' %}?mech_id={{ message.recipient.userprofile.pk }}">{{ message.recipient.userprofile.name|truncatechars:30 }}
+                                (Id: {{ message.recipient.name }})</a>
+                        {% else %}
+                            {{ message.recipient.userprofile.name|truncatechars:30 }} (Id: {{ message.recipient.name }})
+                        {% endif %}
+                    {% elif message.recipient.name %}Anonymous (Id: {{ message.recipient.name }})
+                        {% else %}{{ message.obfuscated_recipient }} (Visitor)
+                    {% endif %}
+                    </span><br>
+                    <span class="pm_subject"
+                          class="word-break: break-all;"><strong>Subject: </strong>{{ message.subject }}</span><br>
+                    {% if message.is_rejected %}
+                        <div class="pm_status text-danger">Rejected
+                            {% if message.moderation_reason %}: {{ message.moderation_reason }}{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="pm_body box effect2 text-left">{{ message.body|linebreaksbr }}</div>
+            </div><br>
+            {% if forloop.last %}
+                {% if reply_to_pk %}
+                    <hr/>
+                    <h1><span class="colortext">Reply</span></h1>
+                    <form action="{% url 'postman:reply' reply_to_pk %}?next={{ next_url|urlencode }}"
+                          method="post">{% csrf_token %}
+                        <div id="pm_reply">
+                            {{ form.body|attr:"class:col-xs-12" }}
+                        </div>
+                        <div class="row">
+                            {% if request|check_send_rate_tag %}
+                                <div class="text-left col-xs-6"></div>
+                            {% else %}
+                                <div class="text-left col-xs-6">
+                                    <div class="g-recaptcha"
+                                         data-sitekey="6LcXDxETAAAAALuaxvBV9bnM94gQDplSJdYvIkrl"></div>
+                                    {{ form.captcha.error }}
+                                </div>
+                            {% endif %}
+                            <div class="text-right col-xs-6">
+                                <button class="btn btn-default" type="submit" style="margin-bottom:20px;"
+                                        onclick="this.disabled=true;this.form.submit();">Send
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>Login - MechPages</title>
+{% endblock %}
+
+{% block active %}
+    {% include "nav.html" with style="True" login="activelink" %}
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Login To MechPages</span></h1>
+{% endblock %}
+
+{% block content %}
+    <br>
+    <div class="text-center">
+        {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+        {% include "socialaccount/snippets/login_extra.html" %}
+    </div>
+
+    <div class="text-center smalltitle form">
+        <h5>Or</h5>
+
+        <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+{#            {{ form.as_p }}#}
+            <div class="col-xs-12 text-left text-danger">{{ form.non_field_errors }}</div>
+            <div class="col-xs-12 text-left text-danger">{{ form.login.errors }}</div>
+            {{ form.login|attr:"class:col-xs-12"|attr:"placeholder:E-mail Address"|attr:"autofocus" }}
+
+            <div class="col-xs-12 text-left text-danger">{{ form.password.errors }}</div>
+            {{ form.password|attr:"class:col-xs-12"|attr:"placeholder:Password" }}
+
+            <div class="col-xs-6 text-left">
+                <input id="id_remember" name="remember" type="checkbox" checked/>
+                <label for="id_remember">Remember Me</label>
+            </div>
+            <p class="col-xs-6 text-right"><a href="{% url 'account_reset_password' %}">Forgot password?</a></p>
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+            {% endif %}
+            <input type="submit" id="login" class="btn btn-default" value="Login">
+        </form>
+    </div>
+    <br><p class="text-center">Don't have an account? Sign up as a <a href="{% url 'account_signup' %}">User</a> or a <a
+        href="{% url 'mechanic_signup' %}">Mechanic</a>.</p>
+{% endblock %}

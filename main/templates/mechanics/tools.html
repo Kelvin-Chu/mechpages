@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>Toolbox - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Toolbox</span></h1>
+{% endblock %}
+
+{% block content %}
+    <br>
+    <div class="text-center col-sm-10 col-sm-offset-1">
+        <div class="row">
+            <div class="alert alert-info alert-dismissable">
+                <a class="panel-close close" data-dismiss="alert">x</a>
+                More tools to come.
+            </div>
+        </div>
+        <div class="row">
+            <div class="text-center">
+                <div class="col-xs-6 col-sm-4 col-md-3">
+                    <a href="{% url 'profile_wizard' %}?page=1">
+                        <div class="fancyy-box">
+                            <div class="circleicon">
+                                <i class="icon-magic"></i>
+                            </div>
+                            <h3>Profile Wizard</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-3">
+                    <a href="{% url 'browse_requests' %}">
+                        <div class="fancyy-box">
+                            <div class="circleicon">
+                                <i class="icon-book"></i>
+                            </div>
+                            <h3>Browse Requests</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

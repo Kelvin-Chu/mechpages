@@ -1,0 +1,31 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account %}
+
+{% block extrahead %}
+    <title>Confirm E-mail Address - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Confirm E-mail Address</span></h1>
+{% endblock %}
+
+{% block content %}
+    <br>
+    {% if confirmation %}
+        {% user_display confirmation.email_address.user as user_display %}
+        <p class="text-center">{% blocktrans with confirmation.email_address.email as email %}Please confirm that
+            <a href="mailto:{{ email }}">{{ email }}</a> is your e-mail address
+            .{% endblocktrans %}</p>
+        <div class="text-center smalltitle form">
+            <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-default" value="Confirm">
+            </form>
+        </div>
+    {% else %}
+        {% url 'account_email' as email_url %}
+        <p class="text-center">{% blocktrans %}This e-mail confirmation link expired or is invalid. Please
+            <a href="{{ email_url }}">issue a new e-mail confirmation request</a>.{% endblocktrans %}</p>
+    {% endif %}
+{% endblock %}

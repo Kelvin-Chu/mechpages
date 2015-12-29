@@ -1,0 +1,85 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>E-mail Settings - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">E-mail Addresses</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% if user.emailaddress_set.all %}
+        <p class="text-center">The following e-mail addresses are associated with your account:</p>
+        <div class="text-center smalltitle form">
+            <form action="{% url 'account_email' %}" class="email_list" method="post">
+                {% csrf_token %}
+                <fieldset class="blockLabels">
+                    {% for emailaddress in user.emailaddress_set.all %}
+                        <div class="ctrlHolder">
+                            <label for="email_radio_{{ forloop.counter }}"
+                                   class="{% if emailaddress.primary %}primary_email{% endif %}">
+
+                                <input id="email_radio_{{ forloop.counter }}" type="radio" name="email"
+                                       {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{% endif %}
+                                       value="{{ emailaddress.email }}"/>
+                                {{ emailaddress.email|truncatechars:45 }}
+                                {% if emailaddress.verified %}
+                                    - Verified
+                                {% else %}
+                                    - Unverified
+                                {% endif %}
+                                {% if emailaddress.primary %}
+                                    - Primary
+                                {% endif %}
+                            </label>
+                        </div>
+                    {% endfor %}
+
+                    <div class="buttonHolder">
+                        <input type="submit" name="action_primary" id="action_primary" class="btn btn-default"
+                               value="Make Primary">
+                        <input type="submit" name="action_send" id="action_send" class="btn btn-default"
+                               value="Re-send Verification">
+                        <input type="submit" name="action_remove" id="action_remove" class="btn btn-default"
+                               value="Remove">
+                    </div>
+
+                </fieldset>
+            </form>
+        </div>
+    {% else %}
+        <p class="text-center">
+            <strong>{% trans 'Warning:' %}</strong> {% trans "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc." %}
+        </p>
+    {% endif %}
+    <div class="text-center smalltitle">
+        <h5>{% trans "Add E-mail Address" %}</h5>
+
+        <form method="post" action="{% url 'account_email' %}" class="add_email">
+            {% csrf_token %}
+            <div class="col-xs-12 text-left">{{ form.email.errors }}</div>
+            {{ form.email|attr:"class:col-xs-12"|attr:"placeholder:Email Address" }}
+            <input type="submit" name="action_add" id="action_add" class="btn btn-default" value="Add E-mail">
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block extra_body %}
+    <script type="text/javascript">
+        (function () {
+            var message = "{% trans 'Do you really want to remove the selected e-mail address?' %}";
+            var actions = document.getElementsByName('action_remove');
+            if (actions.length) {
+                actions[0].addEventListener("click", function (e) {
+                    if (!confirm(message)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        })();
+    </script>
+{% endblock %}

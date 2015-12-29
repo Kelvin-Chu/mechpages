@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Contact - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Contact</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="text-center col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+        <form role="form" action="{% url 'contact' %}" method="post">
+            {% csrf_token %}
+            <label class="col-xs-12 text-left" for="id_name">Your name:</label>
+            <input class="col-xs-12" id="id_name" name="name" type="text">
+            <label class="col-xs-12 text-left" for="id_email">Your email:</label>
+            <input class="col-xs-12" id="id_email" name="email" type="email">
+            <label class="col-xs-12 text-left" for="id_message">What do you want to say?</label>
+            <textarea class="col-xs-12" cols="40" id="id_message" name="message" rows="10"></textarea>
+            <button class="btn btn-default pull-right" type="submit">Submit</button>
+        </form>
+    </div>
+{% endblock %}

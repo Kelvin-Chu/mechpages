@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block active %}
+    {% include "nav.html" with style="True" messages="activelink" %}
+{% endblock %}
+
+{% comment %}
+    {% load postman_tags %}
+
+    {% block postman_menu %}
+        <ul id="postman_menu">{% postman_unread as unread_count %}
+            <li><a href="{% url 'postman:inbox' %}">&raquo;&nbsp;{% trans "Inbox" %}{% if unread_count %} <strong>({{ unread_count }})</strong>{% endif %}</a></li>
+            <li><a href="{% url 'postman:sent' %}">&raquo;&nbsp;{% trans "Sent Messages" %}</a></li>
+            <li><a href="{% url 'postman:write' %}">&raquo;&nbsp;{% trans "Write" %}</a></li>
+            <li><a href="{% url 'postman:archives' %}">&raquo;&nbsp;{% trans "Archives" %}</a></li>
+            <li><a href="{% url 'postman:trash' %}">&raquo;&nbsp;{% trans "Trash" %}</a></li>
+        </ul>
+    {% endblock %}
+{% endcomment %}

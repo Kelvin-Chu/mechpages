@@ -1,0 +1,15 @@
+{% extends "postman/base_folder.html" %}
+{% load static from staticfiles %}
+
+{% block pm_folder_title %}Archived Messages{% endblock %}
+
+{% block extrahead %}
+    <title>Archived - MechPages</title>
+    <link href="{% static 'postman/css/postman.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block pm_archive_button %}{% endblock %}
+{% block pm_undelete_button %}{% endblock %}
+{% block pm_footer_info %}
+<p>Messages in this folder will never be removed. You can use this folder for long term storage.</p>
+{% endblock %}

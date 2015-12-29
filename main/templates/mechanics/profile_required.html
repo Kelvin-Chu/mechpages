@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+    <title>Profile Required - MechPages</title>
+    <meta http-equiv="refresh" content="3; url={% url 'profile_wizard' %}" />
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Profile Required</span></h1>
+{% endblock %}
+
+{% block content %}
+    <p class="text-center topspace50">You must complete your profile before being able to access this page.  Redirecting...</p>
+{% endblock %}

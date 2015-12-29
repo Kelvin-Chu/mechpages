@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block extrahead %}
+    <title>Review - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Review</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% if is_mechanic %}
+        <h4 class="text-center topspace50">Mechanic Accounts Cannot Review Other Mechanics</h4>
+    {% elif no_points %}
+        <h4 class="text-center topspace50">You do not have enough points to write another review.</h4>
+        <p class="text-center topspace15">There is a limit on the number of reviews each user can write in order to
+            reduce the number of fake reviews and spammers.</p>
+    {% elif reviewed %}
+        <h4 class="text-center topspace50">You have already reviewed this mechanic.</h4>
+    {% elif not name %}
+        <h4 class="text-center topspace50">User Not Found</h4>
+    {% else %}
+        <div class="text-center">
+            <div class="col-md-8 col-md-offset-2">
+                <h4>How would you rate {{ name|truncatechars:50 }}?</h4>
+
+                <form role="form" action="{% url 'review' %}?mech_id={{ mech_id }}" method="post">
+                    {% csrf_token %}
+                    <div class="col-xs-12 text-danger">{{ form.non_field_errors }}</div>
+                    <div class="col-xs-12 text-danger">{{ form.rating.errors }}</div>
+                    {{ form.rating|attr:"class:rating"|attr:"data-min:0"|attr:"data-max:5"|attr:"data-step:1"|attr:"autofocus" }}
+                    <div class="col-md-12 text-danger">{{ form.comment.errors }}</div>
+                    {{ form.comment|attr:"class:topspace15 col-xs-12"|attr:"rows:10"|attr:"cols:50"|attr:"maxlength:3000"|attr:"placeholder:Comments" }}
+                    <button type="submit" class="btn btn-default start tabable">Submit</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_body %}
+    <script>
+        $("#id_rating").rating("create", {
+            "size": "sm",
+            "glyphicon": false,
+            "ratingClass": "rating-fa",
+            "showClear": false,
+            "hoverChangeCaption": false
+        });
+    </script>
+{% endblock %}

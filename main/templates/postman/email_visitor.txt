@@ -1,0 +1,18 @@
+{% load i18n %}{% autoescape off %}{% trans "Howdy Partner," %}
+
+{% if action == 'rejection' %}{% blocktrans with object.sent_at|date:"DATETIME_FORMAT" as date and object.recipient.userprofile.name as recipient %}On {{ date }}, you sent a message to the user '{{ recipient }}'.{% endblocktrans %}
+
+{% trans "Your message has been rejected by the moderator" %}{% if object.moderation_reason %}{% trans ", for the following reason:" %}
+    {{ object.moderation_reason }}{% else %}.{% endif %}
+
+{% trans "As a reminder, please find below the content of your message." %}
+{% else %}{% if object.sender.userprofile.name %}You have received a response from {{ object.sender.userprofile.name }}:{% else %}You have received a response from your mechanic:{% endif %}{% endif %}
+
+{{ object.subject }}
+-------------------------------------------------------
+{{ object.body }}
+-------------------------------------------------------
+
+Send another message @ http://www.mechpages.com/messages/write/{% if action == 'rejection' %}{{ object.recipient.name }}{% else %}{{ object.sender.name }}{% endif %}
+{% endautoescape %}
+Sign up @ http://www.mechpages.com/accounts/signup/ for a better experience!

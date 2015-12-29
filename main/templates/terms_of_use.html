@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Terms Of Use - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">Terms Of Use</span></h1>
+{% endblock %}
+
+{% block content %}
+    {% include 'TermsOfUse.txt' %}
+{% endblock %}

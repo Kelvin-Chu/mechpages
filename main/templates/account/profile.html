@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static from staticfiles %}
+
+{% block extrahead %}
+    <title>Profile - MechPages</title>
+{% endblock %}
+
+{% block active %}
+    {% include "nav.html" with style="True" profile="activelink" %}
+{% endblock %}
+
+{% block content %}
+    <br>
+    <form class="form-horizontal" method="POST" role="form" action="{% block link %}{% endblock %}"
+          enctype="multipart/form-data"
+          onSubmit="return getData();">
+        {% csrf_token %}
+        <div class="hidden-md hidden-lg">
+            {% if success %}
+                <div class="alert alert-success alert-dismissable">
+                    <a class="panel-close close" data-dismiss="alert">x</a>
+                    <i class="icon-ok"></i>
+                    Successfully saved.
+                </div>
+            {% elif form.non_field_errors %}
+                <div class="alert alert-danger alert-dismissable">
+                    <a class="panel-close close" data-dismiss="alert">x</a>
+                    <i class="icon-ok"></i>
+                    {{ form.non_field_errors }}
+                </div>
+            {% else %}
+                <div class="alert alert-info alert-dismissable">
+                    <a class="panel-close close" data-dismiss="alert">x</a>
+                    <i class="icon-coffee"></i>
+                    Be sure to <strong>save</strong> your changes.
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                {% if request.user.userprofile.avatar %}
+                        <div id="cropper" class="cropper">
+                            <img src="{{ request.user.userprofile.avatar_thumbnail.url }}" class="avatar-lg" alt="avatar" id="id_avatar_img">
+                        </div>
+                {% else %}
+                    <div id="cropper" class="cropper">
+                        <img src="{% static 'img/profile_default.png' %}" class="avatar-lg" id="id_avatar_img"
+                             alt="avatar">
+                    </div>
+                {% endif %}
+                <h6 class="font500">Upload a different photo...</h6>
+                {{ form.image_extra }}
+                <input id="id_avatar" name="avatar" type="file" class="form-control avatarInput" title="None"
+                       accept="image/*">
+                <span id="file_error"></span>
+
+                <div class="ext-left text-danger">{{ form.avatar.errors }}</div>
+            </div>
+        </div>
+        <div class="col-md-9 personal-info">
+            <div class="hidden-sm hidden-xs">
+                {% if success %}
+                    <div class="alert alert-success alert-dismissable">
+                        <a class="panel-close close" data-dismiss="alert">x</a>
+                        <i class="icon-ok"></i>
+                        Successfully saved.
+                    </div>
+                {% elif form.non_field_errors %}
+                    <div class="alert alert-danger alert-dismissable">
+                        <a class="panel-close close" data-dismiss="alert">x</a>
+                        <i class="icon-ok"></i>
+                        {{ form.non_field_errors }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info alert-dismissable">
+                        <a class="panel-close close" data-dismiss="alert">x</a>
+                        <i class="icon-coffee"></i>
+                        Be sure to <strong>save</strong> your changes.
+                    </div>
+                {% endif %}
+            </div>
+            {% block form %}{% endblock %}
+        </div>
+    </form>
+{% endblock %}
+{% block extra_body %}
+    <script>
+        {% comment 'Calls this function whenever a user selects an image' %}{% endcomment %}
+        $('#id_avatar').change(function () {
+            var $cropper = $("#cropper");
+            var $file_error = $("#file_error");
+            var $image_input = $(".avatarInput");
+            var $default_img = $("<img>", {
+                "id": "id_avatar_img",
+                "src": '{% static 'img/profile_default.png' %}',
+                "class": "avatar-lg"
+            });
+            readURL(this);
+
+            {% comment 'Function to initializes the cropper (https://github.com/fengyuanchen/cropper)' %}{% endcomment %}
+            function initCropper() {
+                var $image = $('#id_img'),
+                        cropBoxData,
+                        canvasData;
+                $image.cropper({
+                    autoCropArea: 0.60,
+                    aspectRatio: 1,
+                    minCropBoxWidth: 50,
+                    guides: false,
+                    built: function () {
+                        $image.cropper('setCropBoxData', cropBoxData);
+                        $image.cropper('setCanvasData', canvasData);
+                    }
+                });
+            }
+
+            {% comment %}
+                The idea for how this work is as follow:
+                    1) empty out the div with the default image and adding the loading fontawesome icon
+                    2) check size and file type of selected image, error and return to default image if not good
+                    3) create a new filereader from the user selected image, remove loading symbol and append the image to div
+                    4) call the initiate cropper on the image that was just appended
+            {% endcomment %}
+            function readURL(input) {
+                $cropper.empty();
+                var loading = $("<i>", {"class": "icon-spinner icon-spin icon-5x"});
+                $cropper.append(loading);
+                if (input.files && input.files[0]) {
+                    var file = input.files[0];
+                    var file_size = file.size;
+                    if (file_size > 10485760) {
+                        $cropper.empty();
+                        $cropper.append($default_img);
+                        $file_error.html("File size must be less than 10MB");
+                        $image_input.css("border-color", "#FF0000");
+                        $(".avatarInput").val('');
+                    } else if (/^image\/jpeg$/.test(file.type) || /^image\/png/.test(file.type) || /^image\/gif$/.test(file.type)) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $file_error.html("");
+                            $image_input.css("border-color", "#F0F0F0");
+                            $cropper.empty();
+                            var newImg = $("<img>", {"id": "id_img", "src": e.target.result});
+                            $cropper.append(newImg);
+                            initCropper();
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        $cropper.empty();
+                        $cropper.append($default_img);
+                        $file_error.html("Only jpeg, png, and gif formats are supported.");
+                        $image_input.css("border-color", "#FF0000");
+                        $(".avatarInput").val('');
+                    }
+                } else {
+                    $cropper.empty();
+                    $cropper.append($default_img);
+                }
+            }
+        });
+
+        {% comment 'Passes crop information (x, y, width, height) into the view' %}{% endcomment %}
+        function getData() {
+            var $image_input = $(".avatarInput");
+            if ($image_input.get(0).files.length == 0) {
+                return true;
+            } else {
+                var $img = $('#id_img');
+                $("#id_add").button('loading');
+                var data = $img.cropper("getData");
+                $("#id_image_extra").val(JSON.stringify(data));
+                return true;
+            }
+        }
+    </script>
+{% endblock %}

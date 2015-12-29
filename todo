@@ -1,0 +1,17 @@
+* report mechanics and comments feature
+* mechanic profile settings page
+* usage of user address and car in requests and messages
+* http://uwsgi-docs.readthedocs.org/en/latest/StatsServer.html
+* error management for ajax calls in browse page
+* look into third party costs (twilio, leaflet, mapbox, google map search, google nocaptcha, dotcom monitor)
+* django-axes (https://github.com/django-pci/django-axes)
+* https://www.reddit.com/r/django/comments/2s4h3c/what_are_some_popular_examples_of_django_apps/
+* ckeditor (https://github.com/django-ckeditor/django-ckeditor#demo-test-application)
+* add post expiration (maybe 30 days)
+* add post pictures
+* block user for messages feature
+* manual rds backup (http://wiredify.com/shohey1226/logs/Shell-script-to-take-backup-of-RDS-and-store-S3)
+* better design for profile wizard 2 (add skills)
+* automatic ip location detect for browse
+* option for mechanics to reveal phone number and email
+* You are better off trying to make a site for independent shops that won't fuck you. It's not going to be as cheap as the guy on craigslist, but you don't have to worry about getting your car back in pieces, either.

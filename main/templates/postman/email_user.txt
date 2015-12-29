@@ -1,0 +1,18 @@
+{% load i18n %}{% autoescape off %}{% if action == 'rejection' %}{% if object.sender.userprofile.name %}Howdy {{ object.sender.userprofile.name }},{% else %}Howdy Partner,{% endif %}
+
+{% blocktrans with object.sent_at|date:"DATETIME_FORMAT" as date and object.recipient.userprofile.name as recipient %}On {{ date }}, you sent a message to the user '{{ recipient }}'.{% endblocktrans %}
+
+{% trans "Your message has been rejected by the moderator" %}{% if object.moderation_reason %}{% trans ", for the following reason:" %}
+    {{ object.moderation_reason }}{% else %}{% endif %}
+
+{% else %}{% if object.recipient.userprofile.name %}Howdy {{ object.recipient.userprofile.name }},{% else %}Howdy Partner,{% endif %}
+
+{% if object.parent_id %}{% if object.parent.sender_id == object.recipient_id %}You received a response from {% if object.sender.userprofile.name %}{{ object.sender.userprofile.name }} (Id: {{ object.sender.name }}){% elif object.sender.name %}Anonymous (Id: {{ object.sender.name }}){% else %}{{ message.obfuscated_sender|truncatechars:30 }} (Visitor){% endif %}:{% endif %}{% else %}You received a new message from {% if object.sender.userprofile.name %}{{ object.sender.userprofile.name|truncatechars:30 }} (Id: {{ object.sender.name }}){% elif object.sender.name %}Anonymous (Id: {{ object.sender.name }}){% else %}{{ object.obfuscated_sender|truncatechars:30 }} (Visitor){% endif %}:{% endif %}{% endif %}
+
+{{ object.subject }}
+-------------------------------------------------------
+{{ object.body }}
+-------------------------------------------------------
+
+Reply @ http://www.mechpages.com/messages/reply/{{ object.pk }}
+{% endautoescape %}

@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+{% load static from staticfiles %}
+{% load thumbnail %}
+
+{% block extrahead %}
+    <title>Images - MechPages</title>
+{% endblock %}
+
+{% block intro %}
+    <h1><span class="colortext">3. Images</span></h1>
+{% endblock %}
+
+{% block content %}
+    <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="56" aria-valuemin="0"
+             aria-valuemax="100" style="width:56%">
+            <span class="sr-only">56% Complete</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2 text-center">
+            <h3 class="landingpage">
+                <mark class="landingpage">Seeing is believing.  Show off your capabilities.</mark>
+            </h3>
+        </div>
+    </div>
+    <div class="row topspace20">
+        <div class="col-xs-10 col-xs-offset-1">
+            {% comment 'Calls the add image modal if the user has not reached limit' %}{% endcomment %}
+            {% if request.user.projectimages.count < request.user.userprofile.project_limit %}
+                <div class="col-md-4">
+                    <a id="add" href="#" data-toggle="modal" data-target="#addModal">
+                        <div class="thumbnail">
+                            <h4 class="font300">Add Image</h4>
+                            <br><i class="icon-plus-sign icon-xlarge"></i>
+
+                            <div class="caption">
+                                <p>
+                                    Click here to add an image
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+            {% if request.user.projectimages.count == 0 %}
+                <div class="col-md-4">
+                    <div id="example" class="thumbnail">
+                        <h4 class="font300">Example</h4>
+                        <img src="{% static 'img/serpentine_belt_thumb.jpg' %}" alt="">
+
+                        <div class="caption">
+                            <p>
+                                Serpentine belt snapped and I replaced it at a record time of 14 minutes and 35 seconds.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% comment 'Loop through the user's projectimage models and list all images' %}{% endcomment %}
+            {% for image in request.user.projectimages.all %}
+                <div class="col-md-4">
+                    <div class="thumbnail">
+                        {% comment 'Calls the delete image modal and passes the image.pk to data-id via js' %}{% endcomment %}
+                        <a class="close open-DeleteDialog" href="#" data-id="{{ image.pk }}" data-toggle="modal"
+                           data-target="#deleteModal">x</a>
+                        <h4 class="font300" style="min-height:23px; word-wrap:break-word;">{{ image.title }}</h4>
+                        <a class="open-ImageDialog" href="#" data-id="{{ image.image.url }}" data-toggle="modal"
+                           data-target="#imageModal">
+                            <img src="{{ image.image_thumbnail.url }}" width="{{ image.image_thumbnail.width }}"
+                                 height="{{ image.image_thumbnail.height }}">
+                        </a>
+
+                        <div class="caption">
+                            <p style="word-wrap:break-word;">
+                                {{ image.description }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <a class="btn btn-default" href="{% url 'profile_wizard' %}?page=2"><i
+                    class='icon-double-angle-left'></i> Prev</a>
+            <a class="btn btn-default" href="{% url 'profile_wizard' %}?page=4">Next <i
+                    class='icon-double-angle-right'></i></a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_body %}
+    {% comment 'Modal for deleting an image' %}{% endcomment %}
+    <div class="modal fade" id="deleteModal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+                <form method="POST" role="form" action="{% url 'delete' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>Note: The image will be permanently removed.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input type="hidden" id="id_item_pk" name="item_pk" value="">
+                        <input type="hidden" name="page" value="3">
+                        <input type="hidden" name="model" value="ProjectImage">
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% comment 'Modal for adding images with cropper' %}{% endcomment %}
+    <div class="modal fade" id="addModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Photo</h4>
+                </div>
+                <form method="POST" role="form" action="{% url 'profile_wizard' %}?page=3"
+                      enctype="multipart/form-data" onSubmit="return getData();">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="col-xs-12 text-left text-danger">{{ form.non_field_errors }}</div>
+                        <div class="col-xs-12 text-left text-danger">{{ form.title.errors }}</div>
+                        {{ form.title|attr:"class:col-xs-12"|attr:"placeholder:Title" }}
+
+                        <div id="cropper" class="cropper col-xs-12 text-center">
+                            <img src="{% static 'img/img-placeholder.jpg' %}" id="id_img">
+                        </div>
+                        <br>
+
+                        <div class="col-xs-12 text-left text-danger">{{ form.image.errors }}</div>
+                        <span class="red" id="file_error"></span>
+                        <input id="id_image" name="image" type="file" title="None"
+                               class="form-control imageInput col-xs-12 topspace15" accept="image/*">
+
+                        <div class="col-xs-12 text-left text-danger">{{ form.description.errors }}</div>
+                        {{ form.description|attr:"class:col-xs-12"|attr:"placeholder:Description (100 characters max)"|attr:"style:height:120px" }}
+                        {{ form.image_extra|attr:"class:col-xs-12" }}
+                        <p></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-default" name="page3" value="Add" id="id_add"
+                                data-loading-text="<i class='icon-spinner icon-spin'></i> Wait">
+                            Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% comment 'Modal for enlarging pictures' %}{% endcomment %}
+    <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="" id="imagepreview" style="width: 100%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        {% comment 'Calls this function whenever a user selects an image' %}{% endcomment %}
+        $('#id_image').change(function () {
+            var $cropper = $("#cropper");
+            var $file_error = $("#file_error");
+            var $image = $("#id_image");
+            var $default_img = $("<img>", {"id": "id_img", "src": "{% static 'img/img-placeholder.jpg' %}"});
+            readURL(this);
+
+            {% comment 'Function to initializes the cropper (https://github.com/fengyuanchen/cropper)' %}{% endcomment %}
+            function initCropper() {
+                var $image = $('#id_img'),
+                        cropBoxData,
+                        canvasData;
+                $image.cropper({
+                    autoCropArea: 0.60,
+                    aspectRatio: 4 / 3,
+                    minCropBoxWidth: 50,
+                    guides: false,
+                    built: function () {
+                        $image.cropper('setCropBoxData', cropBoxData);
+                        $image.cropper('setCanvasData', canvasData);
+                    }
+                });
+            }
+
+            {% comment %}
+                The idea for how this work is as follow:
+                    1) empty out the div with the default image and adding the loading fontawesome icon
+                    2) check size and file type of selected image, error and return to default image if not good
+                    3) create a new filereader from the user selected image, remove loading symbol and append the image to div
+                    4) call the initiate cropper on the image that was just appended
+            {% endcomment %}
+            function readURL(input) {
+                $cropper.empty();
+                var loading = $("<i>", {"class": "icon-spinner icon-spin icon-5x"});
+                $cropper.append(loading);
+                if (input.files && input.files[0]) {
+                    var file = input.files[0];
+                    var file_size = file.size;
+                    if (file_size > 10485760) {
+                        $cropper.empty();
+                        $cropper.append($default_img);
+                        $file_error.html("File size must be less than 10MB");
+                        $image.css("border-color", "#FF0000");
+                        $("#id_image").val('');
+                    } else if (/^image\/jpeg$/.test(file.type) || /^image\/png/.test(file.type) || /^image\/gif$/.test(file.type)) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $file_error.html("");
+                            $image.css("border-color", "#F0F0F0");
+                            $cropper.empty();
+                            var newImg = $("<img>", {"id": "id_img", "src": e.target.result});
+                            $cropper.append(newImg);
+                            initCropper();
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        $cropper.empty();
+                        $cropper.append($default_img);
+                        $file_error.html("Only jpeg, png, and gif formats are supported.");
+                        $image.css("border-color", "#FF0000");
+                        $("#id_image").val('');
+                    }
+                } else {
+                    $cropper.empty();
+                    $cropper.append($default_img);
+                }
+            }
+        });
+
+        {% comment 'Passes crop information (x, y, width, height) into the view' %}{% endcomment %}
+        function getData() {
+            var $file_error = $("#file_error");
+            var $image = $("#id_image");
+            var $cropper = $("#cropper");
+            var $default_img = $("<img>", {"id": "id_img", "src": "{% static 'img/img-placeholder.jpg' %}"});
+
+            if ($image.get(0).files.length == 0) {
+                $cropper.empty();
+                $cropper.append($default_img);
+                $file_error.html("This field is required.");
+                $image.css("border-color", "#FF0000");
+                $("#id_image").val('');
+                return false;
+            } else {
+                var $img = $('#id_img');
+                $("#id_add").button('loading');
+                var data = $img.cropper("getData");
+                $("#id_image_extra").val(JSON.stringify(data));
+                return true;
+            }
+        }
+
+        {% comment 'Automatically open up the modal if there is a form error' %}{% endcomment %}
+        {% if form.non_field_errors or form.title.errors or form.image.errors or form.description.errors %}
+            $(window).load(function () {
+                $('#addModal').modal('show');
+            });
+        {% endif %}
+
+        {% comment 'Pass in image primary key from the link to the input value in the modal' %}{% endcomment %}
+        $(document).on("click", ".open-DeleteDialog", function () {
+            var item_pk = $(this).data('id');
+            $('#id_item_pk').val(item_pk);
+        });
+
+        {% comment 'Attach the image source to #imagepreview based off of data-id from the link' %}{% endcomment %}
+        $(document).on("click", ".open-ImageDialog", function () {
+            var imagesrc = $(this).data('id');
+            $('#imagepreview').attr('src', imagesrc);
+        });
+
+        {% comment 'Prevent modal from openning on smaller resolution because image is bigger than modal' %}{% endcomment %}
+        $('#imageModal').on('show.bs.modal', function (e) {
+            var width = $(window).width();
+            if (width < 992) {
+                e.preventDefault();
+            }
+        });
+    </script>
+{% endblock %}
