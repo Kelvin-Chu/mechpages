@@ -1,0 +1,409 @@
+#todo: migrate this to ansible playbook
+
+sudo su -
+rpm -iUvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install screen psmisc mlocate yum-utils wget bind-utils openssl gcc make gcc-c++ vim-enhanced lsof cpan strace libjpeg-devel libzip-devel lapack lapack-devel blas blas-devel yum-cron git telnet -y
+yum update -y
+updatedb
+cpan
+install Bundle::LWP
+## no to all external tests for the following step
+install LWP::Protocol::https 
+exit
+adduser kchu
+adduser www
+usermod -a -G www kchu
+passwd kchu
+visudo
+========================================================
+kchu    ALL=(ALL)       ALL
+========================================================
+vi /etc/group
+========================================================
+-centos
+========================================================
+cp -R /home/centos/.ssh/ /home/kchu/
+chown -R kchu:kchu /home/kchu/
+chown -R www:www /home/www/
+echo "autodetach on
+
+shell -\${SHELL}
+defscrollback 2024
+startup_message off
+hardstatus on
+
+vbell off
+hardstatus alwayslastline
+hardstatus string \"%{= g} %{= w}%-Lw%{=r}%n%f* %t%{-}%+LW\"
+
+bindkey \"^[OP\" select 0
+bindkey \"^[OQ\" select 1
+bindkey \"^[OR\" select 2
+bindkey \"^[OS\" select 3
+bindkey \"^[[15~\" select 4
+bindkey \"^[[17~\" select 5
+bindkey \"^[[18~\" select 6
+bindkey \"^[[19~\" select 7
+bindkey \"^[[20~\" select 8
+bindkey \"^[[21~\" select 9
+bindkey -k F1 prev
+bindkey -k F2 next" > /home/kchu/.screenrc
+echo 'function ssh() {
+echo -n -e "\033k$1\033\134"
+/usr/bin/ssh $@
+echo -n -e "\033k`hostname -s`\033\134"
+}
+alias resume="screen -x work"' >> /home/kchu/.bashrc
+echo "termcapinfo xterm* 'is=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;4;6l'" > /etc/screenrc
+chown -R kchu:kchu /home/kchu/
+chown -R www:www /home/www/
+# try logging in as kchu
+userdel -r centos
+rm -rf /home/centos
+timedatectl set-timezone America/Chicago
+hostnamectl set-hostname mechpages.com
+
+
+## Webserver
+yum install iptables-services nginx -y
+systemctl enable nginx.service
+systemctl enable iptables
+systemctl start iptables
+echo "*filter
+-A INPUT -i lo -j ACCEPT
+-A INPUT -d 127.0.0.0/8 -j REJECT
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A OUTPUT -j ACCEPT
+-A INPUT -p tcp --dport 80 -j ACCEPT
+-A INPUT -p tcp --dport 443 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW --dport 22 -j ACCEPT
+-A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+-A INPUT -m limit --limit 5/min -j LOG --log-prefix \"iptables denied: \" --log-level 7
+-A INPUT -j DROP
+-A FORWARD -j DROP
+COMMIT" > /etc/iptables.firewall.rules
+iptables-restore < /etc/iptables.firewall.rules
+/usr/libexec/iptables/iptables.init save
+mkdir /etc/mechpages
+mkdir /etc/mechpages/static
+mkdir /etc/mechpages/media
+mkdir /etc/mechpages/nginx
+chown -R www:www /etc/mechpages
+chmod -R 775 /etc/mechpages
+echo "uwsgi_param  QUERY_STRING       \$query_string;
+uwsgi_param  REQUEST_METHOD     \$request_method;
+uwsgi_param  CONTENT_TYPE       \$content_type;
+uwsgi_param  CONTENT_LENGTH     \$content_length;
+
+uwsgi_param  REQUEST_URI        \$request_uri;
+uwsgi_param  PATH_INFO          \$document_uri;
+uwsgi_param  DOCUMENT_ROOT      \$document_root;
+uwsgi_param  SERVER_PROTOCOL    \$server_protocol;
+uwsgi_param  REQUEST_SCHEME     \$scheme;
+uwsgi_param  HTTPS              \$https if_not_empty;
+
+uwsgi_param  REMOTE_ADDR        \$remote_addr;
+uwsgi_param  REMOTE_PORT        \$remote_port;
+uwsgi_param  SERVER_PORT        \$server_port;
+uwsgi_param  SERVER_NAME        \$server_name;" > /etc/mechpages/nginx/uwsgi_params
+echo 'upstream django {
+    ip_hash;
+    #server 127.0.0.1:8000;
+    server unix:/etc/mechpages/env/uwsgi.sock;
+}
+
+server { 
+    listen 80; 
+    server_name www.mechpages.com mechpages.com;                             
+    access_log off; 
+    return 301 https://$server_name$request_uri; 
+} 
+
+server {
+    listen      443 default ssl;
+    server_name www.mechpages.com mechpages.com;
+    ssl_certificate /etc/mechpages/nginx/key/mechpages.crt;
+    ssl_certificate_key /etc/mechpages/nginx/key/mechpages.key;
+    error_log   /var/log/nginx/mechpages.com-error.log warn;
+    access_log  /var/log/nginx/mechpages.com-access.log;
+    charset     utf-8;
+    gzip on;
+    gzip_disable "msie6";
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 0;
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss application/javascript text/javascript;
+    client_max_body_size 75M;
+
+    #location /media  {
+    #    alias /etc/mechpages/media;
+    #    location ~* \.(js|css|png|jpg|jpeg|gif|ico|woff)$ {
+    #        expires 14d;
+    #    }
+    #}
+
+    location /static {
+        alias /etc/mechpages/static;
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|woff)$ {
+            expires 14d;
+        }
+    }
+    
+    location  /robots.txt {
+        alias  /etc/mechpages/static/robots.txt;
+    }
+    
+    location  /sitemap.xml {
+        alias  /etc/mechpages/static/sitemap.xml;
+    }
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        uwsgi_pass  django;
+        #proxy_pass http://localhost:9000/;
+        include     /etc/mechpages/nginx/uwsgi_params;
+    }
+
+    if ($request_method !~ ^(GET|HEAD|POST)$ )
+    {
+        return 444;
+    }
+
+}' > /etc/mechpages/nginx/main_nginx.conf
+ln -s /etc/mechpages/nginx/main_nginx.conf /etc/nginx/conf.d/
+sed -i 's/user nginx/user www/' /etc/nginx/nginx.conf
+echo "type=AVC msg=audit(1442820238.917:602): avc:  denied  { write } for  pid=2845 comm="nginx" name="uwsgi.sock" dev="xvda1" ino=109087200 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:etc_t:s0 tclass=sock_file
+type=AVC msg=audit(1442819402.760:1210): avc:  denied  { connectto } for  pid=5450 comm="nginx" path="/etc/mechpages/env/uwsgi.sock" scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:system_r:initrc_t:s0 tclass=unix_stream_socket
+type=AVC msg=audit(1442819017.903:1207): avc:  denied  { write } for  pid=5450 comm="nginx" name="uwsgi.sock" dev="xvda1" ino=109102024 scontext=system_u:system_r:httpd_t:s0 tcontext=system_u:object_r:httpd_sys_content_t:s0 tclass=sock_file" | audit2allow -M nginx
+semodule -i nginx.pp
+setsebool -P httpd_can_network_connect 1
+rm -rf /usr/share/nginx/html/*
+echo "<html>
+<head>Blank</head>
+<body>There is nothing here.</body>
+</html>" > /usr/share/nginx/html/index.html
+vi /etc/nginx/nginx.conf
+====================add above sendfile==================
+    server_tokens       off;
+========================================================
+systemctl start nginx.service
+chown -R www:www /var/lib/nginx/
+
+
+## Django Server
+sed -i 's/mydestination = $myhostname, localhost.$mydomain, localhost/mydestination = localhost/' /etc/postfix/main.cf
+service postfix restart
+yum install mariadb mariadb-devel -y
+yum-builddep python -y
+wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+tar xzf Python-3.4.3.tgz
+cd Python-3.4.3
+./configure
+make
+make install
+cd ..
+rm -rf Python-3.4.3 Python-3.4.3.tgz
+alias python='/usr/local/bin/python3.4'
+pip3.4 install --upgrade pip
+pip install virtualenv
+cd /etc/mechpages
+virtualenv env
+echo 'alias mech="cd /etc/mechpages; source env/bin/activate"' >> /etc/bashrc
+alias mech="cd /etc/mechpages; source env/bin/activate"
+unalias python
+mech
+pip install django mysqlclient uwsgi django-allauth django-postman django-widget-tweaks django-authtools redis django-redis pillow sorl-thumbnail django-cleanup twilio django-imagekit simplejson numpy django-ipware django-recaptcha django-storages-redux boto awscli django_compressor geopy
+## for scipy, you may need to create an image, launch a stronger machine, recreate image, then launch the weaker machine with the new image
+pip install scipy
+mkdir /var/log/uwsgi
+django-admin.py startproject main
+echo "STATIC_ROOT = '/etc/mechpages/static'" >> /etc/mechpages/main/main/settings.py
+echo "[uwsgi]
+#socket          = :8000
+socket          = /etc/mechpages/env/uwsgi.sock
+chdir           = /etc/mechpages/main
+module          = main.wsgi
+home            = /etc/mechpages/env
+master          = true
+processes       = 10
+max-requests    = 5000
+harakiri        = 20
+#enable-threads  = true
+#threads         = 2
+#offload-threads = 2 
+uid             = www
+post-buffering  = 1
+daemonize       = /var/log/uwsgi/mechpages.log
+logto           = /var/log/uwsgi/mechpages.log
+log-date        = true
+honour-stdin    = true
+pidfile         = /run/mechpages-uwsgi.pid
+vacuum          = true" > /etc/mechpages/env/uwsgi.ini
+chown www:www /etc/mechpages/env
+cd /etc/mechpages/main
+echo "[Unit]
+Description=uWSGI Django
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/run/mechpages-uwsgi.pid
+ExecStart=/usr/bin/bash -c 'source /etc/mechpages/env/bin/activate; /etc/mechpages/env/bin/uwsgi --ini /etc/mechpages/env/uwsgi.ini'
+ExecReload=/bin/kill -s HUP $MAINPID 
+KillMode=process
+KillSignal=SIGQUIT
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target" > /usr/lib/systemd/system/uwsgi.service
+systemctl enable uwsgi.service
+systemctl start uwsgi.service
+## Add www.mechpages.com and mechpages.com and redis server to /etc/hosts
+
+
+## mgmt server
+yum install php php-pear php-fpm php-mysql phpMyAdmin -y
+vi /etc/php.ini
+========================================================
+-;error_log = php_errors.log
+-;cgi.fix_pathinfo=1
++error_log = /var/log/nginx/php_errors.log
++cgi.fix_pathinfo=0
+========================================================
+vi /etc/php-fpm.d/www.conf
+========================================================
+-listen = 127.0.0.1:9000
++listen = /var/run/php-fpm/php-fpm.sock
+========================================================
+systemctl start php-fpm
+systemctl enable php-fpm.service
+echo 'server {
+       listen   8001;
+       server_name localhost;
+       access_log /var/log/nginx/phpmyadmin-access.log;
+       error_log /var/log/nginx/phpmyadmin-error.log;
+       root /usr/share/phpMyAdmin;
+
+       location / {
+           index  index.php;
+       }
+
+       ## Images and static content is treated different
+       location ~* ^.+.(jpg|jpeg|gif|css|png|js|ico|xml)$ {
+           access_log        off;
+           expires           360d;
+       }
+
+       location ~ /\.ht {
+           deny  all;
+       }
+
+       location ~ /(libraries|setup/frames|setup/libs) {
+           deny all;
+           return 404;
+       }
+
+       location ~ \.php$ {
+           allow 127.0.0.1;
+           deny all;
+           include /etc/nginx/fastcgi_params;
+           fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+           fastcgi_index index.php;
+           fastcgi_param SCRIPT_FILENAME /usr/share/phpMyAdmin$fastcgi_script_name;
+       }
+}' > /etc/nginx/conf.d/phpmyadmin_nginx.conf
+ln -s /usr/share/phpMyAdmin /usr/share/nginx/html
+semanage port -a -t http_port_t -p tcp 8001
+sed -i 's/localhost/db000.ctdph4smyism.us-west-2.rds.amazonaws.com/' /etc/phpMyAdmin/config.inc.php
+cd ~
+git clone https://github.com/ErikDubbelboer/phpRedisAdmin.git
+git clone https://github.com/nrk/predis.git vendor
+mv phpRedisAdmin /usr/share/
+cp /usr/share/phpRedisAdmin/includes/config.sample.inc.php /usr/share/phpRedisAdmin/includes/config.inc.php
+## might need to define redis host in config.inc.php
+mv vendor /usr/share/phpRedisAdmin/
+echo 'server {
+    listen   8003;
+    server_name localhost;
+    access_log /var/log/nginx/phpredisadmin-access.log;
+    error_log /var/log/nginx/phpredisadmin-error.log;
+    root /usr/share/phpRedisAdmin;
+
+    index  index.php index.html;
+
+    location ~ \.php$ {
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        if (!-f $document_root$fastcgi_script_name) {
+           return 404;
+        }
+
+        allow 127.0.0.1;
+        deny all;
+        include /etc/nginx/fastcgi_params;
+        fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME /usr/share/phpRedisAdmin$fastcgi_script_name;
+    }
+}' > /etc/nginx/conf.d/phpredisadmin_nginx.conf
+semanage port -a -t http_port_t -p tcp 8003
+restorecon -R /usr/share/phpRedisAdmin/*
+systemctl restart php-fpm
+systemctl restart nginx.service
+
+
+## Redis Server (cache)
+yum install redis php-pecl-redis -y
+## Two important redis server configuration file’s path
+## 1. /etc/redis.conf
+## 2. /etc/redis-sentinel.conf
+##
+sed -i 's/# maxmemory <bytes>/maxmemory 500000000/' /etc/redis.conf
+sed -i 's/# maxmemory-policy volatile-lru/maxmemory-policy allkeys-lru/' /etc/redis.conf
+echo "never" > /sys/kernel/mm/transparent_hugepage/enabled
+echo "vm.overcommit_memory = 1" >> /etc/sysctl.conf
+sysctl vm.overcommit_memory=1
+sed -i 's/User=redis/User=www/' /usr/lib/systemd/system/redis.service
+sed -i 's/Group=redis/Group=www/' /usr/lib/systemd/system/redis.service
+## you may need to define private ip in /usr/lib/systemd/system/redis.service as the listener
+#sed -i 's$# unixsocket /tmp/redis.sock$unixsocket /etc/mechpages/env/redis.sock$' /etc/redis.conf
+#sed -i 's$# unixsocketperm 700$unixsocketperm 700$' /etc/redis.conf
+chown -R www:www /var/lib/redis
+chown -R www:www /var/log/redis
+systemctl enable redis.service
+systemctl start redis.service
+
+
+## upload django project
+python manage.py collectstatic
+vi /etc/mechpages/main/main/settings.py
+========================================================
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'db000.ctdph4smyism.us-west-2.rds.amazonaws.com',
+        'PORT': '3306',
+    }
+}
+========================================================
+python manage.py makemigrations
+cp mechpages/sql/0002_load_intial_data.py mechpages/migrations/
+python manage.py migrate
+python manage.py createsuperuser
+systemctl restart uwsgi.service
+chown -R www:www /etc/mechpages
+chown -R www:www /var/log/uwsgi/
+
+##if database already exists
+python manage.py migrate --fake
+
+
+aws configure
+
+find /etc/mechpages/main -path "*/migrations/*.py" -not -name "__init__.py" -delete
